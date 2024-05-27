@@ -43,7 +43,7 @@ const player_getAll = async () => {
         return cachedPlayers;
     }
 
-    const players = await db.Player.find({}, 'name id').exec();
+    const players = await db.Player.find({}, 'name id matchWebhooks').exec();
 
     cachedPlayers = players;
     return players;
@@ -53,6 +53,17 @@ const player_getAll = async () => {
 const player_getAllNames = async () => {
     const players = await player_getAll();
     return players.map(player => player.name);
+};
+
+// Get all names and webhooks
+const player_getAllNamesAndWwebhooks = async () => {
+    const players = await player_getAll();
+    return players.map(player => {
+        return {
+            name: player.name,
+            webhooks: player.matchWebhooks
+        }
+    });
 };
 //#endregion -----------------------------------------------------PLAYER-----------------------------------------------------
 
@@ -96,6 +107,7 @@ module.exports = {
         getById: player_getById,
         getAll: player_getAll,
         getAllNames: player_getAllNames,
+        getAllNamesAndWwebhooks: player_getAllNamesAndWwebhooks,
         getPlayersAndRecentMatches: getPlayersAndRecentMatches
     },
     Queue: {

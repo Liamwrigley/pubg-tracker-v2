@@ -7,10 +7,6 @@ const GameModesToTrack = config.GAME_MODES_TO_TRACK;
 const MatchTypesToTrack = config.MATCH_TYPES_TO_TRACK;
 
 
-// if (!gameModesToTrack.includes(gameMode)) {
-//     return null; // Exclude the match
-// }
-
 const getMatchData = async (matchId, playerNames) => {
     const { matchData, seasonId } = await API.Match.getMatchById(matchId);
 

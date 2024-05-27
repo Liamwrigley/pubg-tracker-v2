@@ -25,6 +25,7 @@ db.Database.connection.on('connected', async () => {
     });
 
     // check queue to see if there are any pending matches and process
+    console.log(chalk.yellow.italic('Syncing any pending matches...'));
     Q_Helper();
 
     //start probing for new matches

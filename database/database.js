@@ -145,6 +145,7 @@ const Match = mongoose.model('Match', matchSchema);
 const playerSchema = new mongoose.Schema({
     id: { type: String, required: true },
     name: { type: String, required: true },
+    matchWebhooks: { type: [webhookSchema], default: [] },
     ts: { type: Number, required: true, default: () => moment().utc().unix() },
     stats: { type: [playerStatsSchema], default: [] }
 }, { timestamps: true });

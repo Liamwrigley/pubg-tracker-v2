@@ -36,14 +36,17 @@ const handlePendingQueue = () => {
             // call itself again if isTaskWaiting = true
             if (isTaskWaiting) {
                 isTaskWaiting = false;
-                console.log(chalk.green("isTaskWaiting = true. calling handlePendingQueue()"))
+                console.log(chalk.green("New match added to queue - will process after current task is done"))
                 handlePendingQueue();
             }
 
             if (!isProcessing && !isTaskWaiting) {
                 //TODO: we might not have data changed here. need to check
                 //TODO: send notification to discord. At this point all data should be processed
+
+                //TOOD: This is when we should send the leaderboard updates.
                 console.log(chalk.green('placeholder. send notification to discord. At this point all data should be processed'))
+
             }
 
             resolve(code); // Resolve the promise when the child process ends
