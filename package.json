@@ -1,0 +1,26 @@
+{
+  "name": "pubg-tracker-v2",
+  "version": "1.0.0",
+  "description": "pubg tracker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "resetQueue": "node scripts/resetQueue.js",
+    "processQueue": "node scripts/processQueue.js",
+    "removeHistory": "node scripts/removeHistory.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.3",
+    "canvas": "^2.11.2",
+    "chalk": "^4.1.2",
+    "cli-progress": "^3.12.0",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "moment-timezone": "^0.5.43",
+    "mongoose": "^8.0.3",
+    "node-schedule": "^2.1.1"
+  }
+}

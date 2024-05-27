@@ -1,0 +1,20 @@
+{
+    "GAME_MODES_TO_TRACK": [
+        "solo",
+        "normal-solo",
+        "solo-fpp",
+        "normal-solo-fpp",
+        "duo",
+        "normal-duo",
+        "duo-fpp",
+        "normal-duo-fpp",
+        "squad",
+        "normal-squad",
+        "squad-fpp",
+        "normal-squad-fpp"
+    ],
+    "MATCH_TYPES_TO_TRACK": [
+        "official",
+        "seasonal"
+    ]
+}

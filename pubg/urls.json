@@ -1,0 +1,10 @@
+{
+    "getSeasons": "https://api.pubg.com/shards/steam/seasons",
+    "getPlayersSeason": {
+        "part1": "https://api.pubg.com/shards/steam/seasons/",
+        "part2": "/gameMode/squad/players?filter[playerIds]="
+    },
+    "getPlayersByNames": "https://api.pubg.com/shards/steam/players?filter[playerNames]=",
+    "getPlayerById": "https://api.pubg.com/shards/steam/players?filter[playerIds]=",
+    "getMatchById": "https://api.pubg.com/shards/steam/matches/"
+}
