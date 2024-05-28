@@ -2,6 +2,7 @@ const db = require('../database/index.js');
 const PUBG_HELPERS = require("../pubg/helpers.js")
 const cliProgress = require('cli-progress');
 const discordHelper = require('../discord/discord.js');
+const matchOutputHelper = require('../outputs/buildMatchHistory.js');
 
 
 const formatAndSendMatchToDiscord = async (players, match) => {
@@ -17,6 +18,9 @@ const formatAndSendMatchToDiscord = async (players, match) => {
     const uniqueWebhooks = [...new Set(webhooks.flat())];
 
     match.matchingPlayerCount = matchingPlayers.length;
+
+    // create images
+    matchOutputHelper.CreateMatchHistory(match);
 
     await discordHelper.SendMatches(uniqueWebhooks, match);
 }
