@@ -141,8 +141,7 @@ const TeamItems = (ctx, team) => {
     ctx.font = `${fontSizes.header()}px ${fonts.header}`;
 
     var teamData = [
-        { text: `TEAM ALPHA`, x: X(0), y: Y(0), fw: fontSizes.header(), font: fonts.header },
-        // { text: `+`, x: startX + padding, y: startY + padding, fw: fontSizes.header(), font: fonts.header },
+        { text: `TEAM ALPHA`, x: X(0), y: Y(0), fw: fontSizes.header(), font: fonts.header }, // ------------------------------------------------TODO
     ]
 
     ctx.font = `${fontSizes.header(30)}px ${fonts.header}`;
@@ -178,13 +177,6 @@ const TeamItems = (ctx, team) => {
     team.players.forEach((player, i) => {
         teamData.push(...buildPlayer(i + 1, player))
     })
-
-    // teamData.push(...buildPlayer(1, { name: 'Player 1', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
-    // teamData.push(...buildPlayer(2, { name: 'Player 2', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
-    // teamData.push(...buildPlayer(3, { name: 'Player 3', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
-    // teamData.push(...buildPlayer(4, { name: 'Player 4', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
-
-
 
     return teamData;
 }
