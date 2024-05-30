@@ -17,25 +17,26 @@ const sectionSizes = {
     },
 }
 const fontSizes = {
-    header: 21,
-    body: 18
+    header: (size = 21) => `normal 700 ${size}`,
+    body: (size = 18) => `normal 400 ${size}`,
 }
 const fonts = {
-    header: 'SairaBold',
-    body: 'SairaRegular'
+    header: 'Saira',
+    body: 'Saira',
 }
 const lineHeight = 30;
 const padding = 15;
 
-registerFont('./assets/fonts/Saira_Bold.ttf', { family: 'SairaBold' });
-registerFont('./assets/fonts/Saira_Light.ttf', { family: 'SairaLight' });
-registerFont('./assets/fonts/Saira_Regular.ttf', { family: 'SairaRegular' });
+const RegisterFonts = () => {
+    registerFont('./assets/fonts/Saira-Regular.ttf', { family: 'Saira', weight: '400' });
+    registerFont('./assets/fonts/Saira-Bold.ttf', { family: 'Saira', weight: '700' });
+}
 
 
 const WriteFont = (ctx, text, x, y, font, size) => {
-    ctx.font = `${size}px ${font}`;
+    ctx.font = `${size}px "${font}"`;
     ctx.fillText(text, x, y);
-    ctx.font = `${fontSizes.body}px ${fonts.body}`;
+    ctx.font = `${fontSizes.body}px "${fonts.body}"`;
 }
 
 const GetImages = async () => {
@@ -58,6 +59,7 @@ const CreateCtx = (width, height) => {
 
 
 const CreateMatchHistory = async (match) => {
+    RegisterFonts();
     const images = await GetImages();
 
     const pass = {
@@ -69,9 +71,7 @@ const CreateMatchHistory = async (match) => {
     //save header
     fs.writeFileSync('./assets/images/testoutputs/test_header.png', header);
 
-    const teams = CreateTeam(pass);
-    //save header
-    fs.writeFileSync('./assets/images/testoutputs/test_teams.png', teams);
+    const teams = CreateTeams(pass);
 
     // return canvas.toBuffer();
 }
@@ -83,7 +83,7 @@ const HeaderItems = (ctx, match) => {
     const boxWidth = 254;
 
     // set because measureText needs to know what font & size
-    ctx.font = `${fontSizes.header}px ${fonts.header}`;
+    ctx.font = `${fontSizes.header()}px ${fonts.header}`;
 
     const X = (v) => startX + padding + v;
     const Y = (v) => startY + padding + (v * headerLineHeight);
@@ -114,23 +114,98 @@ const CreateHeader = ({ images, match }) => {
     ctx.drawImage(images.header, 0, 0, sectionSizes.header.width, sectionSizes.header.height);
 
     HeaderItems(ctx, match).forEach(item => {
-        WriteFont(ctx, item.text, item.x, item.y, fonts.header, fontSizes.header);
+        WriteFont(ctx, item.text, item.x, item.y, fonts.header, fontSizes.header());
     })
-
-    // WriteFont(ctx, 'Match Header', 10, 10, fonts.header, fontSizes.header);
 
     // uncomment when we are sending to discord again
     // return canvas.toBuffer();
     return canvas.toBuffer('image/png');
 }
 
-const CreateTeam = ({ images, match }) => {
+const TeamItems = (ctx, team) => {
+    const startX = 25;
+    const startY = 35;
+    const headerLineHeight = 35;
+    const cellWidth = ((sectionSizes.team.width - (startX * 2) - (padding * 2)) / 6);
+    const cellPadding = 15;
+    const maxCellWidth = cellWidth - (cellPadding * 2);
+
+    const trunc = (text) => ctx.measureText(text).width > maxCellWidth ? `${text.substring(0, 10)}...` : text;
+
+    const X = (v) => startX + padding + v;
+    const Y = (v) => startY + padding + (v * headerLineHeight);
+
+    const RHS_X = (text, v) => sectionSizes.team.width - startX - padding - v - ctx.measureText(text).width
+
+    // set because measureText needs to know what font & size
+    ctx.font = `${fontSizes.header()}px ${fonts.header}`;
+
+    var teamData = [
+        { text: `TEAM ALPHA`, x: X(0), y: Y(0), fw: fontSizes.header(), font: fonts.header },
+        // { text: `+`, x: startX + padding, y: startY + padding, fw: fontSizes.header(), font: fonts.header },
+    ]
+
+    ctx.font = `${fontSizes.header(30)}px ${fonts.header}`;
+    teamData.push({
+        text: `#${team.winPlace}`, x: RHS_X(`#${team.winPlace}`, -10), y: Y(0) + 3, fw: fontSizes.header(30), font: fonts.header
+    })
+
+    const tableStartY = 35;
+    const tableY = (v) => tableStartY + Y(v);
+    const tableX = (v) => startX + padding + (cellWidth * v)
+    const tableX_RHS = (text, v) => startX + padding + (cellWidth * v) + cellWidth - ctx.measureText(text).width
+
+    ctx.font = `${fontSizes.body()}px ${fonts.body}`;
+
+    teamData.push(
+        { text: ``, x: tableX(0), y: tableY(0), fw: fontSizes.body(), font: fonts.body },
+        { text: `KILLS`, x: tableX_RHS(`KILLS`, 1), y: tableY(0), fw: fontSizes.body(), font: fonts.body },
+        { text: `DAMAGE`, x: tableX_RHS(`DAMAGE`, 2), y: tableY(0), fw: fontSizes.body(), font: fonts.body },
+        { text: `DBNO`, x: tableX_RHS(`DBNO`, 3), y: tableY(0), fw: fontSizes.body(), font: fonts.body },
+        { text: `REVIVES`, x: tableX_RHS(`REVIVES`, 4), y: tableY(0), fw: fontSizes.body(), font: fonts.body },
+    )
+
+    const buildPlayer = (y, player) => {
+        return [
+            { text: `${player.name}`, x: tableX(0), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
+            { text: `${player.kills}`, x: tableX_RHS(`${player.kills}`, 1), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
+            { text: `${player.damageDealt.toFixed(0)}`, x: tableX_RHS(`${player.damageDealt.toFixed(0)}`, 2), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
+            { text: `${player.DBNOs}`, x: tableX_RHS(`${player.DBNOs}`, 3), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
+            { text: `${player.revives}`, x: tableX_RHS(`${player.revives}`, 4), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
+        ]
+    }
+
+    team.players.forEach((player, i) => {
+        teamData.push(...buildPlayer(i + 1, player))
+    })
+
+    // teamData.push(...buildPlayer(1, { name: 'Player 1', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
+    // teamData.push(...buildPlayer(2, { name: 'Player 2', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
+    // teamData.push(...buildPlayer(3, { name: 'Player 3', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
+    // teamData.push(...buildPlayer(4, { name: 'Player 4', kills: 1, damageDealt: 100, DBNOs: 2, revives: 1 }))
+
+
+
+    return teamData;
+}
+
+const CreateTeams = ({ images, match }) => {
+    return match.teams.forEach((team) => {
+        const teamOutput = CreateTeam(images, team)
+        fs.writeFileSync(`./assets/images/testoutputs/${match.matchId}.png`, teamOutput);
+    })
+}
+
+const CreateTeam = (images, team) => {
     const { canvas, ctx } = CreateCtx(sectionSizes.team.width, sectionSizes.team.height)
 
     ctx.drawImage(images.teamBg, 0, 0, sectionSizes.team.width, sectionSizes.team.height);
     ctx.drawImage(images.teamMask, 0, 0, sectionSizes.team.width, sectionSizes.team.height);
 
-    WriteFont(ctx, 'Team Name', 10, 10, fonts.header, fontSizes.header);
+    ctx.fillStyle = "white";
+    TeamItems(ctx, team).forEach(item => {
+        WriteFont(ctx, item.text, item.x, item.y, item.font, item.fw);
+    })
 
     // uncomment when we are sending to discord again
     // return canvas.toBuffer();
