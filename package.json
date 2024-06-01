@@ -8,7 +8,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "resetQueue": "node scripts/resetQueue.js",
     "processQueue": "node scripts/processQueue.js",
-    "removeHistory": "node scripts/removeHistory.js"
+    "removeHistory": "node scripts/removeHistory.js",
+    "listPlayers": "node scripts/listPlayers.js",
+    "resetStats": "node scripts/resetStats.js",
+    "addWebhook": "node scripts/addWebhook.js"
   },
   "author": "",
   "license": "ISC",

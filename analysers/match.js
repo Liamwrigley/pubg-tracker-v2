@@ -1,9 +1,9 @@
+const crypto = require('crypto')
 const db = require('../database/index.js');
 const PUBG_HELPERS = require("../pubg/helpers.js")
 const cliProgress = require('cli-progress');
 const discordHelper = require('../discord/discord.js');
 const matchOutputHelper = require('../outputs/buildMatchHistory.js');
-
 
 const formatAndSendMatchToDiscord = async (players, match) => {
     // find all webhook urls to send for.
@@ -20,9 +20,24 @@ const formatAndSendMatchToDiscord = async (players, match) => {
     match.matchingPlayerCount = matchingPlayers.length;
 
     // create images
-    matchOutputHelper.CreateMatchHistory(match);
+    let images = null
+    images = await matchOutputHelper.CreateMatchHistory(match);
 
-    await discordHelper.SendMatches(uniqueWebhooks, match);
+    await discordHelper.SendMatches(uniqueWebhooks, match, images);
+}
+
+
+// This function assigns team names to each team in the match based on the players' names.
+// It uses a hash function to generate a unique hash for each team and then selects a team name from the provided list of team names.
+const setTeamNames = (match) => {
+    const teamNames = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT", "GOLF", "HOTEL", "INDIA", "JULIET", "KILO", "LIMA", "MIKE", "NOVEMBER", "OSCAR", "PAPA", "QUEBEC", "ROMEO", "SIERRA", "TANGO", "UNIFORM", "VICTOR", "WHISKEY", "XRAY", "YANKEE", "ZULU"];
+
+    match.teams.forEach(team => {
+        const playerString = team.players.map(p => p.name).sort().join('');
+        const hash = crypto.createHash('sha256').update(playerString).digest('hex');
+        const hashNumber = parseInt(hash, 16);
+        team.teamName = teamNames[hashNumber % teamNames.length];
+    })
 }
 
 const processPendingMatch = async (players, match) => {
@@ -36,6 +51,8 @@ const processPendingMatch = async (players, match) => {
         }
 
         var savedMatch = await db.Database.Match.easyAdd(matchData);
+
+        setTeamNames(savedMatch);
         await formatAndSendMatchToDiscord(players, savedMatch);
 
         await match.setStatus(db.Database.Queue.QueueStatus.COMPLETE);

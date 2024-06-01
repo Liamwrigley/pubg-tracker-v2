@@ -15,10 +15,14 @@ const sectionSizes = {
         width: 900,
         height: 313
     },
+    footer: {
+        width: 900,
+        height: 150
+    }
 }
 const fontSizes = {
     header: (size = 21) => `normal 700 ${size}`,
-    body: (size = 18) => `normal 400 ${size}`,
+    body: (size = 20) => `normal 400 ${size}`,
 }
 const fonts = {
     header: 'Saira',
@@ -44,6 +48,7 @@ const GetImages = async () => {
         header: await loadImage('./assets/images/match/header.png'),
         teamMask: await loadImage('./assets/images/match/team-mask.png'),
         teamBg: await loadImage('./assets/images/match/team-image.png'),
+        footer: await loadImage('./assets/images/match/footer.png')
     }
 
     return images;
@@ -68,12 +73,35 @@ const CreateMatchHistory = async (match) => {
     }
 
     const header = CreateHeader(pass);
-    //save header
-    fs.writeFileSync('./assets/images/testoutputs/test_header.png', header);
-
     const teams = CreateTeams(pass);
+    const footer = CreateFooter(pass);
 
-    // return canvas.toBuffer();
+    const totalHeight = sectionSizes.header.height + (sectionSizes.team.height * teams.length) + sectionSizes.footer.height;
+
+    const { canvas: finalImage, ctx } = CreateCtx(sectionSizes.header.width, totalHeight);
+    ctx.fillStyle = "white";
+
+    let currentY = 0;
+
+    // Draw header
+    ctx.drawImage(header, 0, currentY);
+    currentY += sectionSizes.header.height;
+
+    // Draw teams
+    teams.forEach((team) => {
+        ctx.drawImage(team, 0, currentY);
+        currentY += sectionSizes.team.height;
+    });
+
+    // Draw footer
+    ctx.drawImage(footer, 0, currentY);
+
+    return {
+        header: header.toBuffer(),
+        teams: teams.map(t => t.toBuffer()),
+        footer: footer.toBuffer(),
+        finalImage: finalImage.toBuffer()
+    };
 }
 
 const HeaderItems = (ctx, match) => {
@@ -117,9 +145,7 @@ const CreateHeader = ({ images, match }) => {
         WriteFont(ctx, item.text, item.x, item.y, fonts.header, fontSizes.header());
     })
 
-    // uncomment when we are sending to discord again
-    // return canvas.toBuffer();
-    return canvas.toBuffer('image/png');
+    return canvas;
 }
 
 const TeamItems = (ctx, team) => {
@@ -141,7 +167,7 @@ const TeamItems = (ctx, team) => {
     ctx.font = `${fontSizes.header()}px ${fonts.header}`;
 
     var teamData = [
-        { text: `TEAM ALPHA`, x: X(0), y: Y(0), fw: fontSizes.header(), font: fonts.header }, // ------------------------------------------------TODO
+        { text: `TEAM ${team.teamName}`, x: X(0), y: Y(0), fw: fontSizes.header(), font: fonts.header },
     ]
 
     ctx.font = `${fontSizes.header(30)}px ${fonts.header}`;
@@ -166,7 +192,7 @@ const TeamItems = (ctx, team) => {
 
     const buildPlayer = (y, player) => {
         return [
-            { text: `${player.name}`, x: tableX(0), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
+            { text: `${trunc(player.name)}`, x: tableX(0), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
             { text: `${player.kills}`, x: tableX_RHS(`${player.kills}`, 1), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
             { text: `${player.damageDealt.toFixed(0)}`, x: tableX_RHS(`${player.damageDealt.toFixed(0)}`, 2), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
             { text: `${player.DBNOs}`, x: tableX_RHS(`${player.DBNOs}`, 3), y: tableY(y), fw: fontSizes.body(), font: fonts.body },
@@ -182,10 +208,11 @@ const TeamItems = (ctx, team) => {
 }
 
 const CreateTeams = ({ images, match }) => {
-    return match.teams.forEach((team) => {
-        const teamOutput = CreateTeam(images, team)
-        fs.writeFileSync(`./assets/images/testoutputs/${match.matchId}.png`, teamOutput);
+    const teams = [];
+    match.teams.sort((a, b) => a.winPlace - b.winPlace).forEach((team) => {
+        teams.push(CreateTeam(images, team));
     })
+    return teams;
 }
 
 const CreateTeam = (images, team) => {
@@ -199,10 +226,16 @@ const CreateTeam = (images, team) => {
         WriteFont(ctx, item.text, item.x, item.y, item.font, item.fw);
     })
 
-    // uncomment when we are sending to discord again
-    // return canvas.toBuffer();
-    return canvas.toBuffer('image/png');
+    return canvas;
+}
 
+const CreateFooter = ({ images, match }) => {
+
+    const { canvas, ctx } = CreateCtx(sectionSizes.footer.width, sectionSizes.footer.height + 50)
+
+    ctx.drawImage(images.footer, 0, 0, sectionSizes.footer.width, sectionSizes.footer.height);
+
+    return canvas;
 }
 
 

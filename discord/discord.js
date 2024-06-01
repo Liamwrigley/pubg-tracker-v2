@@ -1,18 +1,52 @@
 const {
     WebhookClient,
-    EmbedBuilder
+    EmbedBuilder,
+    AttachmentBuilder
 } = require('discord.js');
 // require('dotenv').config();
 // const db = require('../database/discord.js');
 
 // const webhookUrl = process.env.WEBHOOK_URL;
-const TeamNames = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT", "GOLF", "HOTEL", "INDIA", "JULIET", "KILO", "LIMA", "MIKE", "NOVEMBER", "OSCAR", "PAPA", "QUEBEC", "ROMEO", "SIERRA", "TANGO", "UNIFORM", "VICTOR", "WHISKEY", "XRAY", "YANKEE", "ZULU"];
 
+const SendMatchImage = async (webhookUrl, images) => {
+    const wh = new WebhookClient({
+        id: "BOT WATCHR",
+        url: webhookUrl
+    })
 
-const SendMatches = async (webhookUrls, match) => {
+    // to send all separate images
+    // for (const key of Object.keys(images)) {
+    //     if (key !== "finalImage") {
+    //         if (key === "teams") {
+    //             // teams is an array of images
+    //             for (let i = 0; i < images[key].length; i++) {
+    //                 await wh.send({
+    //                     files: [new AttachmentBuilder(images[key][i], { name: `team-${i}.png` })],
+    //                 });
+    //             }
+    //         } else {
+    //             await wh.send({
+    //                 files: [new AttachmentBuilder(images[key], { name: `${key}.png` })],
+    //             });
+    //         }
+    //     }
+    // }
+
+    // to send single image
+    await wh.send({
+        files: [new AttachmentBuilder(images.finalImage, { name: 'match.png' })],
+    });
+}
+
+const SendMatches = async (webhookUrls, match, images = {}) => {
     // loop through all webhook urls and call SendMatch with the match
-    console.log("sending matches")
-    await Promise.all(webhookUrls.map(webhookUrl => SendMatch(webhookUrl, match)));
+    if (images && Object.keys(images).length > 0) {
+        console.log("sending matches as images")
+        await Promise.all(webhookUrls.map(webhookUrl => SendMatchImage(webhookUrl, images)));
+    } else {
+        console.log("sending matches as embeds")
+        await Promise.all(webhookUrls.map(webhookUrl => SendMatch(webhookUrl, match)));
+    }
 }
 
 const SendMatch = async (webhookUrl, match) => {
@@ -52,7 +86,7 @@ const SendMatch = async (webhookUrl, match) => {
                 inline: false
             },
             {
-                name: `**${ordinalSuffix(team.winPlace)}    >>    Team ${TeamNames[i]}**`,
+                name: `**${ordinalSuffix(team.winPlace)}    >>    Team ${team.teamName}**`,
                 value: `\u200b`,
                 inline: false
             },
@@ -75,7 +109,7 @@ const SendMatch = async (webhookUrl, match) => {
         })
     })
 
-    wh.send({
+    await wh.send({
         embeds: [headerEmbed],
     });
 

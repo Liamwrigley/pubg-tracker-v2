@@ -99,6 +99,7 @@ matchSchema.statics.easyAdd = async function (match) {
                 teamId: teamId,
                 winPlace: players[0].winPlace,
                 seasonId: match.seasonId,
+                teamName: null,
                 players: []
             };
 
