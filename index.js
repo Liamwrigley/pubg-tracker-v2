@@ -1,45 +1,47 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const db = require('./database/index.js');
+require("dotenv").config();
+const express = require("express");
+const bodyParser = require("body-parser");
+const db = require("./database/index.js");
+const { Logging } = require("./discord/discord.js");
 
-const Q_Helper = require('./analysers/process')
-const scheduledCheck = require('./schedule/schedule');
+const Q_Helper = require("./analysers/process");
+const scheduledCheck = require("./schedule/schedule");
 
-global.chalk = require('chalk');
+global.chalk = require("chalk");
 
-const app = express()
-const port = 3098
+const app = express();
+const port = 3098;
 app.use(bodyParser.json());
 
-db.Database.connection.on('connected', async () => {
-    console.log(chalk.yellow.italic('Connected to MongoDB'));
+db.Database.connection.on("connected", async () => {
+  console.log(chalk.yellow.italic("Connected to MongoDB"));
+  await Logging.SendInfoReport(
+    `Starting...\nConnected to ${db.Database.connection._connectionString}`
+  );
 
-    const matchQ = db.Database.Queue.MatchQueue.watch();
+  const matchQ = db.Database.Queue.MatchQueue.watch();
 
-    matchQ.on('change', async (change) => {
-        if (change.operationType === 'insert') {
-            console.log(chalk.yellow.italic(`New match added to queue: ${change.fullDocument.matchId}`));
-            await Q_Helper();
-        };
-    });
+  matchQ.on("change", async (change) => {
+    if (change.operationType === "insert") {
+      console.log(
+        chalk.yellow.italic(
+          `New match added to queue: ${change.fullDocument.matchId}`
+        )
+      );
+      await Q_Helper();
+    }
+  });
 
-    // check queue to see if there are any pending matches and process
-    console.log(chalk.yellow.italic('Syncing any pending matches...'));
-    Q_Helper();
+  // check queue to see if there are any pending matches and process
+  console.log(chalk.yellow.italic("Syncing any pending matches..."));
+  Q_Helper();
 
-    //start probing for new matches
-    scheduledCheck();
+  //start probing for new matches
+  scheduledCheck();
 });
 
-
-
-
-
-
-
 const server = app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
 
 // When you want to close the server:
