@@ -13,6 +13,7 @@ const checkForNewMatches = async () => {
   const matchesToIndex = matches.filter(
     (match) => !existingMatches.includes(match)
   );
+
   if (matchesToIndex.length > 0) {
     const bulkOps = matchesToIndex.map((match) => ({
       updateOne: {

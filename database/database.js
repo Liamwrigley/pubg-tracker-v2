@@ -217,6 +217,7 @@ const matchQueueSchema = new mongoose.Schema({
     required: false,
     default: Object.keys(QueueStatus)[QueueStatus.PENDING],
   },
+  failureReason: { type: String, required: false },
   ts: {
     type: Number,
     required: true,
@@ -235,6 +236,10 @@ matchQueueSchema.methods.setStatus = function (newStatus) {
   this.statusCode = Object.keys(QueueStatus)[newStatus];
 
   // Save the document
+  return this.save();
+};
+matchQueueSchema.methods.setFailureReason = function (reason) {
+  this.failureReason = reason;
   return this.save();
 };
 matchQueueSchema.statics.pickNext = async function () {
